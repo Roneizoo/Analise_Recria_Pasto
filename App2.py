@@ -26,7 +26,7 @@ preco_compra_pyg = st.sidebar.number_input("Preço compra (₲/kg PV)", value=20
 cambio = st.sidebar.number_input("Câmbio (₲/US$)", value=7320.0, min_value=0.0, step=10.0, format="%.2f")
 
 dias = st.sidebar.number_input("Período (dias em pastejo)", value=365, min_value=1, step=1)
-gmd = st.sidebar.number_input("Ganho médio diário (kg/dia)", value=0.490, min_value=0.0, step=0.1, format="%.2f")
+gmd = st.sidebar.number_input("Ganho médio diário (kg/dia)", value=0.490, min_value=0.0, step=0.01, format="%.2f")
 
 custo_aluguel = st.sidebar.number_input("Custo aluguel (US$/mês)", value=5.40, min_value=0.0, step=0.1, format="%.2f")
 custo_nutricional = st.sidebar.number_input("Custo nutrição (US$/mês)", value=4.0, min_value=0.0, step=0.1, format="%.2f")
@@ -285,4 +285,5 @@ st.write(f"🐂 Preço compra: **₲ {sens_preco_compra:,.0f} | ${sens_preco_com
 st.write(f"💵 Preço venda: **${sens_preco_venda:.2f}/kg PV**")
 st.write(f"📈 GMD: **{sens_gmd:.2f} kg/dia**")
 st.write(f"🟢 Lucro líquido: **${lucro_sens:,.2f}**")
+
 
