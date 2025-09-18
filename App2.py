@@ -167,8 +167,8 @@ def gerar_pdf():
     # ==============================
     elementos.append(Paragraph("Parâmetros de Compra", styles["TituloSecao"]))
     tabela_params = Table([
-        ["Câmbio (₲/US$)", f"{cambio:,.0f}"],
-        ["Preço bezerro (₲/kg PV)", f"{preco_compra_pyg:,.0f}"],
+        ["Câmbio (G/US$)", f"{cambio:,.0f}"],
+        ["Preço bezerro (G/kg PV)", f"{preco_compra_pyg:,.0f}"],
         ["Preço bezerro (US$/kg PV)", f"{preco_compra_usd_kg:.2f}"],
         ["Preço de venda (US$/kg PV)", f"{preco_venda_kg:.2f}"],
         ["Ágio (%)", f"{agio:.2f}%"],
@@ -285,5 +285,6 @@ st.write(f"🐂 Preço compra: **₲ {sens_preco_compra:,.0f} | ${sens_preco_com
 st.write(f"💵 Preço venda: **${sens_preco_venda:.2f}/kg PV**")
 st.write(f"📈 GMD: **{sens_gmd:.2f} kg/dia**")
 st.write(f"🟢 Lucro líquido: **${lucro_sens:,.2f}**")
+
 
 
