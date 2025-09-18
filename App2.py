@@ -21,16 +21,16 @@ st.markdown("---")
 # ==============================
 st.sidebar.header("Parâmetros de Entrada")
 
-peso_inicial = st.sidebar.number_input("Peso inicial (kg)", value=190.0, min_value=0.0, step=1.0, format="%.2f")
-preco_compra_pyg = st.sidebar.number_input("Preço compra (₲/kg PV)", value=17800.0, min_value=0.0, step=100.0, format="%.2f")
-cambio = st.sidebar.number_input("Câmbio (₲/US$)", value=7820.0, min_value=0.0, step=10.0, format="%.2f")
+peso_inicial = st.sidebar.number_input("Peso inicial (kg)", value=180.0, min_value=0.0, step=1.0, format="%.2f")
+preco_compra_pyg = st.sidebar.number_input("Preço compra (₲/kg PV)", value=21000.0, min_value=0.0, step=100.0, format="%.2f")
+cambio = st.sidebar.number_input("Câmbio (₲/US$)", value=7320.0, min_value=0.0, step=10.0, format="%.2f")
 
-dias = st.sidebar.number_input("Período (dias em pastejo)", value=280, min_value=1, step=1)
-gmd = st.sidebar.number_input("Ganho médio diário (kg/dia)", value=0.80, min_value=0.0, step=0.01, format="%.2f")
+dias = st.sidebar.number_input("Período (dias em pastejo)", value=365, min_value=1, step=1)
+gmd = st.sidebar.number_input("Ganho médio diário (kg/dia)", value=0.49, min_value=0.0, step=0.01, format="%.2f")
 
-custo_aluguel = st.sidebar.number_input("Custo aluguel (US$/mês)", value=5.40, min_value=0.0, step=0.1, format="%.2f")
+custo_aluguel = st.sidebar.number_input("Custo aluguel (US$/mês)", value=5.10, min_value=0.0, step=0.1, format="%.2f")
 custo_nutricional = st.sidebar.number_input("Custo nutrição (US$/mês)", value=4.0, min_value=0.0, step=0.1, format="%.2f")
-custo_operacional = st.sidebar.number_input("Custo operações (US$/mês)", value=3.44, min_value=0.0, step=0.1, format="%.2f")
+custo_operacional = st.sidebar.number_input("Custo operações (US$/mês)", value=3.0, min_value=0.0, step=0.1, format="%.2f")
 
 juros_anual = st.sidebar.number_input("Juros anual (%)", value=8.5, min_value=0.0, step=0.1, format="%.2f") / 100
 preco_venda_kg = st.sidebar.number_input("Preço venda (US$/kg PV)", value=2.40, min_value=0.0, step=0.01, format="%.2f")
@@ -44,7 +44,7 @@ preco_compra_usd_kg = preco_compra_pyg / cambio
 peso_final = peso_inicial + gmd * dias
 gpv = peso_final - peso_inicial
 
-meses = dias / 30
+meses = dias / 30.5
 custo_mensal = custo_aluguel + custo_nutricional + custo_operacional
 custo_total_periodo = custo_mensal * meses
 custo_total = valor_compra_usd + custo_total_periodo
