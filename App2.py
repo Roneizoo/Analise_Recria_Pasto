@@ -21,16 +21,16 @@ st.markdown("---")
 # ==============================
 st.sidebar.header("Parâmetros de Entrada")
 
-peso_inicial = st.sidebar.number_input("Peso inicial (kg)", value=180.0, min_value=0.0, step=1.0, format="%.2f")
-preco_compra_pyg = st.sidebar.number_input("Preço compra (₲/kg PV)", value=21000.0, min_value=0.0, step=100.0, format="%.2f")
+peso_inicial = st.sidebar.number_input("Peso inicial (kg)", value=175.0, min_value=0.0, step=1.0, format="%.2f")
+preco_compra_pyg = st.sidebar.number_input("Preço compra (₲/kg PV)", value=20000.0, min_value=0.0, step=100.0, format="%.2f")
 cambio = st.sidebar.number_input("Câmbio (₲/US$)", value=7320.0, min_value=0.0, step=10.0, format="%.2f")
 
 dias = st.sidebar.number_input("Período (dias em pastejo)", value=365, min_value=1, step=1)
-gmd = st.sidebar.number_input("Ganho médio diário (kg/dia)", value=0.49, min_value=0.0, step=0.01, format="%.2f")
+gmd = st.sidebar.number_input("Ganho médio diário (kg/dia)", value=0.490, min_value=0.0, step=0.1, format="%.2f")
 
-custo_aluguel = st.sidebar.number_input("Custo aluguel (US$/mês)", value=5.10, min_value=0.0, step=0.1, format="%.2f")
+custo_aluguel = st.sidebar.number_input("Custo aluguel (US$/mês)", value=5.40, min_value=0.0, step=0.1, format="%.2f")
 custo_nutricional = st.sidebar.number_input("Custo nutrição (US$/mês)", value=4.0, min_value=0.0, step=0.1, format="%.2f")
-custo_operacional = st.sidebar.number_input("Custo operações (US$/mês)", value=3.0, min_value=0.0, step=0.1, format="%.2f")
+custo_operacional = st.sidebar.number_input("Custo operações (US$/mês)", value=3.44, min_value=0.0, step=0.1, format="%.2f")
 
 juros_anual = st.sidebar.number_input("Juros anual (%)", value=8.5, min_value=0.0, step=0.1, format="%.2f") / 100
 preco_venda_kg = st.sidebar.number_input("Preço venda (US$/kg PV)", value=2.40, min_value=0.0, step=0.01, format="%.2f")
@@ -38,20 +38,36 @@ preco_venda_kg = st.sidebar.number_input("Preço venda (US$/kg PV)", value=2.40,
 # ==============================
 # CÁLCULOS
 # ==============================
+# Compra e preço em dólar
 valor_compra_usd = (peso_inicial * preco_compra_pyg) / cambio
 preco_compra_usd_kg = preco_compra_pyg / cambio
 
+# Ágio (%)
+agio = ((preco_compra_usd_kg - preco_venda_kg) / preco_venda_kg * 100) if preco_venda_kg > 0 else 0
+
+# Ganho de peso
 peso_final = peso_inicial + gmd * dias
 gpv = peso_final - peso_inicial
 
+# Custos variáveis
 meses = dias / 30.5
 custo_mensal = custo_aluguel + custo_nutricional + custo_operacional
 custo_total_periodo = custo_mensal * meses
-custo_total = valor_compra_usd + custo_total_periodo
 
+# Custos de compra
+frete = 8.0
+comissao = 4.0
+
+# Total de custos
+custo_total = valor_compra_usd + custo_total_periodo + frete + comissao
+
+# Receita
 receita = peso_final * preco_venda_kg
+
+# Juros sobre compra
 juros_valor = valor_compra_usd * juros_anual * (dias / 365)
 
+# Resultado final
 lucro = receita - custo_total - juros_valor
 margem_periodo = (lucro / receita * 100) if receita > 0 else 0
 margem_mensal = margem_periodo / meses if meses > 0 else 0
@@ -71,6 +87,8 @@ st.subheader("📋 Parâmetros de Compra")
 st.write(f"💱 Câmbio: **₲ {cambio:,.0f}/US$**")
 st.write(f"🐄 Preço bezerro: **₲ {preco_compra_pyg:,.0f}/kg PV**")
 st.write(f"💵 Preço bezerro: **${preco_compra_usd_kg:.2f}/kg PV**")
+st.write(f"🏷️ Preço de venda: **${preco_venda_kg:.2f}/kg PV**")
+st.write(f"📊 Ágio: **{agio:.2f}%**")
 
 st.markdown("---")
 
@@ -88,16 +106,23 @@ with col1:
     st.write(f"⚖️ Peso final: **{peso_final:.2f} kg**")
     st.write(f"➕ GPV: **{gpv:.2f} kg**")
     st.write(f"📈 GMD: **{gmd:.2f} kg/dia**")
-
 with col2:
     st.subheader("💰 Custos Detalhados")
-    st.write(f"🐂 Custo do animal: **${valor_compra_usd:,.2f}**")
-    st.write(f"🌱 Custo aluguel/mês: **${custo_aluguel:.2f}**")
-    st.write(f"🥣 Custo nutrição/mês: **${custo_nutricional:.2f}**")
-    st.write(f"👨‍🌾 Custo operações/mês: **${custo_operacional:.2f}**")
-    st.write(f"🗓️ Custo total período: **${custo_total_periodo:,.2f}**")
-    st.markdown(f"🔴 <span style='color:red'>**Custo total: ${custo_total:,.2f}**</span>", unsafe_allow_html=True)
-    st.write(f"🏦 Juros sobre compra do animal: **${juros_valor:.2f}**")
+
+    st.markdown("<h5>🐂 Custos de Compra</h5>", unsafe_allow_html=True)
+    st.write(f"• Custo do animal: **${valor_compra_usd:,.2f}**")
+    st.write(f"• 🚚 Frete: **${frete:.2f}**")
+    st.write(f"• 🤝 Comissão: **${comissao:.2f}**")
+
+    st.markdown("<h5>🌱 Custos Variáveis de Produção</h5>", unsafe_allow_html=True)
+    st.write(f"• Custo aluguel/mês: **${custo_aluguel:.2f}**")
+    st.write(f"• Custo nutrição/mês: **${custo_nutricional:.2f}**")
+    st.write(f"• Custo operações/mês: **${custo_operacional:.2f}**")
+
+    st.markdown("<h5>📊 Totais</h5>", unsafe_allow_html=True)
+    st.write(f"• 🗓️ Custo total período: **${custo_total_periodo:,.2f}**")
+    st.write(f"• 🏦 Juros sobre compra do animal: **${juros_valor:.2f}**")
+    st.write(f"• 🔴 **Custo total: ${custo_total:,.2f}**")
 
 with col3:
     st.subheader("📊 Resultado Econômico")
@@ -111,29 +136,50 @@ with col3:
     st.write(f"📆 ROI mensal sobre custo total: **{roi_custo_mensal:.2f}%/mês**")
 
 # ==============================
-# PDF EXPORT (SEM GRÁFICO, MELHORADO)
+# PDF EXPORT
 # ==============================
 def gerar_pdf():
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        leftMargin=2*cm, rightMargin=2*cm,
+        topMargin=2*cm, bottomMargin=2*cm
+    )
+
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name="TituloSecao", fontSize=12, textColor=colors.HexColor("#003366"), spaceBefore=8, spaceAfter=8))
+    styles.add(ParagraphStyle(
+        name="TituloSecao",
+        fontSize=12, leading=14,
+        textColor=colors.HexColor("#003366"),
+        spaceBefore=8, spaceAfter=8
+    ))
+
     elementos = []
 
+    # ==============================
+    # Título
+    # ==============================
     elementos.append(Paragraph("Relatório de Viabilidade Econômica – Recria a Pasto", styles["Heading1"]))
 
-    # Quadro compra
+    # ==============================
+    # Parâmetros de Compra
+    # ==============================
     elementos.append(Paragraph("Parâmetros de Compra", styles["TituloSecao"]))
-    tabela_compra = Table([
-        ["Câmbio (G/US$)", f"{cambio:,.0f}"],
-        ["Preço bezerro (G/kg PV)", f"{preco_compra_pyg:,.0f}"],
+    tabela_params = Table([
+        ["Câmbio (₲/US$)", f"{cambio:,.0f}"],
+        ["Preço bezerro (₲/kg PV)", f"{preco_compra_pyg:,.0f}"],
         ["Preço bezerro (US$/kg PV)", f"{preco_compra_usd_kg:.2f}"],
-    ], colWidths=[220,200])
-    tabela_compra.setStyle(TableStyle([("GRID",(0,0),(-1,-1),0.5,colors.black)]))
-    elementos.append(tabela_compra)
-    elementos.append(Spacer(1,12))
+        ["Preço de venda (US$/kg PV)", f"{preco_venda_kg:.2f}"],
+        ["Ágio (%)", f"{agio:.2f}%"],
+    ], colWidths=[doc.width*0.55, doc.width*0.35])
+    tabela_params.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, colors.black)]))
+    elementos.append(tabela_params)
+    elementos.append(Spacer(1, 12))
 
-    # Indicadores
+    # ==============================
+    # Indicadores Zootécnicos
+    # ==============================
     elementos.append(Paragraph("Indicadores Zootécnicos", styles["TituloSecao"]))
     tabela_ind = Table([
         ["Data inicial", data_inicial.strftime('%d/%m/%Y')],
@@ -143,29 +189,35 @@ def gerar_pdf():
         ["Peso final (kg)", f"{peso_final:.2f}"],
         ["GPV (kg)", f"{gpv:.2f}"],
         ["GMD (kg/dia)", f"{gmd:.2f}"],
-    ], colWidths=[220,200])
-    tabela_ind.setStyle(TableStyle([("GRID",(0,0),(-1,-1),0.5,colors.black)]))
+    ], colWidths=[doc.width*0.55, doc.width*0.35])
+    tabela_ind.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, colors.black)]))
     elementos.append(tabela_ind)
-    elementos.append(Spacer(1,12))
+    elementos.append(Spacer(1, 12))
 
-    # Custos
+    # ==============================
+    # Custos Detalhados (tudo em uma tabela)
+    # ==============================
     elementos.append(Paragraph("Custos Detalhados", styles["TituloSecao"]))
-    tabela_custos = Table([
+    tbl_custos = Table([
         ["Custo do animal (US$)", f"{valor_compra_usd:,.2f}"],
+        ["Frete (US$)", f"{frete:.2f}"],
+        ["Comissão (US$)", f"{comissao:.2f}"],
         ["Custo aluguel/mês (US$)", f"{custo_aluguel:.2f}"],
         ["Custo nutrição/mês (US$)", f"{custo_nutricional:.2f}"],
         ["Custo operações/mês (US$)", f"{custo_operacional:.2f}"],
         ["Custo total período (US$)", f"{custo_total_periodo:,.2f}"],
-        ["Custo total (US$)", f"{custo_total:,.2f}"],
         ["Juros sobre compra do animal (US$)", f"{juros_valor:.2f}"],
-    ], colWidths=[220,200])
-    tabela_custos.setStyle(TableStyle([("GRID",(0,0),(-1,-1),0.5,colors.black)]))
-    elementos.append(tabela_custos)
-    elementos.append(Spacer(1,12))
+        ["Custo total (US$)", f"{custo_total:,.2f}"],
+      ], colWidths=[doc.width*0.55, doc.width*0.35])
+    tbl_custos.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, colors.black)]))
+    elementos.append(tbl_custos)
+    elementos.append(Spacer(1, 12))
 
-    # Resultado
+    # ==============================
+    # Resultado Econômico
+    # ==============================
     elementos.append(Paragraph("Resultado Econômico", styles["TituloSecao"]))
-    tabela_res = Table([
+    tbl_res = Table([
         ["Receita (US$)", f"{receita:,.2f}"],
         ["Lucro líquido (US$)", f"{lucro:,.2f}"],
         ["Margem período (%)", f"{margem_periodo:.2f}%"],
@@ -174,61 +226,63 @@ def gerar_pdf():
         ["ROI mensal (%)", f"{roi_mensal:.2f}%"],
         ["ROI sobre custo total (%)", f"{roi_custo:.2f}%"],
         ["ROI mensal sobre custo total (%)", f"{roi_custo_mensal:.2f}%"],
-    ], colWidths=[220,200])
-    tabela_res.setStyle(TableStyle([("GRID",(0,0),(-1,-1),0.5,colors.black)]))
-    elementos.append(tabela_res)
+    ], colWidths=[doc.width*0.55, doc.width*0.35])
+    tbl_res.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, colors.black)]))
+    elementos.append(tbl_res)
 
+    # ==============================
+    # Montar PDF
+    # ==============================
     doc.build(elementos)
     buffer.seek(0)
     return buffer
-
 st.markdown("---")
 if st.button("📥 Exportar Relatório PDF"):
     pdf_final = gerar_pdf()
     st.download_button("⬇️ Baixar PDF", data=pdf_final, file_name="recria_pasto.pdf", mime="application/pdf")
-st.markdown("---")
-st.subheader("📈 Análise de Sensibilidade Interativa")
 
-col_a, col_b, col_c = st.columns(3)
+st.subheader("📉 Análise de Sensibilidade Interativa")
 
-with col_a:
-    preco_compra_pyg_sens = st.slider(
+colA, colB, colC = st.columns(3)
+
+with colA:
+    sens_preco_compra = st.slider(
         "Preço compra (₲/kg PV)", 
-        min_value=int(preco_compra_pyg*0.8), 
-        max_value=int(preco_compra_pyg*1.2), 
-        value=int(preco_compra_pyg), 
-        step=100
+        min_value=15000, max_value=25000, 
+        value=int(preco_compra_pyg), step=100
     )
 
-with col_b:
-    preco_venda_sens = st.slider(
+with colB:
+    sens_preco_venda = st.slider(
         "Preço venda (US$/kg PV)", 
-        min_value=float(preco_venda_kg*0.8), 
-        max_value=float(preco_venda_kg*1.2), 
-        value=float(preco_venda_kg), 
-        step=0.05
+        min_value=1.5, max_value=3.5, 
+        value=float(preco_venda_kg), step=0.01
     )
 
-with col_c:
-    gmd_sens = st.slider(
+with colC:
+    sens_gmd = st.slider(
         "GMD (kg/dia)", 
-        min_value=float(gmd*0.7), 
-        max_value=float(gmd*1.3), 
-        value=float(gmd), 
-        step=0.05
+        min_value=0.3, max_value=1.5, 
+        value=float(gmd), step=0.01
     )
 
-# Recalcular cenário
-valor_compra_usd_sens = (peso_inicial * preco_compra_pyg_sens) / cambio
-peso_final_sens = peso_inicial + gmd_sens * dias
-gpv_sens = peso_final_sens - peso_inicial
-receita_sens = peso_final_sens * preco_venda_sens
-lucro_sens = receita_sens - (valor_compra_usd_sens + custo_total_periodo) - juros_valor
+# ==============================
+# Recalcular com valores dos sliders
+# ==============================
+valor_compra_usd_sens = (peso_inicial * sens_preco_compra) / cambio
+peso_final_sens = peso_inicial + sens_gmd * dias
+receita_sens = peso_final_sens * sens_preco_venda
+custo_total_sens = valor_compra_usd_sens + custo_total_periodo + frete + comissao
+juros_sens = valor_compra_usd_sens * juros_anual * (dias / 365)
+lucro_sens = receita_sens - custo_total_sens - juros_sens
 
-# Mostrar resultados do cenário
-st.write("### 🔎 Resultado do Cenário")
-st.write(f"🐂 Preço compra: ₲ {preco_compra_pyg_sens:,}  |  ${preco_compra_pyg_sens/cambio:.2f}/kg PV")
-st.write(f"💵 Preço venda: ${preco_venda_sens:.2f}/kg PV")
-st.write(f"📈 GMD: {gmd_sens:.2f} kg/dia")
-st.markdown(f"🟢 **Lucro líquido: ${lucro_sens:,.2f}**")
+# ==============================
+# Resultado do cenário
+# ==============================
+st.markdown("### 🔮 Resultado do Cenário")
+
+st.write(f"🐂 Preço compra: **₲ {sens_preco_compra:,.0f} | ${sens_preco_compra/cambio:.2f}/kg PV**")
+st.write(f"💵 Preço venda: **${sens_preco_venda:.2f}/kg PV**")
+st.write(f"📈 GMD: **{sens_gmd:.2f} kg/dia**")
+st.write(f"🟢 Lucro líquido: **${lucro_sens:,.2f}**")
 
