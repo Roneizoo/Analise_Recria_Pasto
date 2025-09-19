@@ -289,8 +289,47 @@ st.write(f"🟢 Lucro líquido: **${lucro_sens:,.2f}**")
 # ==============================
 # Análise de Impacto (tela)
 # ==============================
+st.subheader("📈 Análise de Impacto")
 
-# Sliders para % de variação
+# --- Impactos fixos do GMD
+incremento_gmd = 0.01  # 0,01 kg = 10 g
+ganho_extra = incremento_gmd * dias
+lucro_extra = ganho_extra * preco_venda_kg
+
+st.markdown(f"- ⚖️ A cada **+10 g/dia** no ganho de peso, o lucro **aumenta** em ~ **${lucro_extra:,.2f}** no período de **{dias} dias**.")
+st.markdown(f"- ⚖️ A cada **-10 g/dia** no ganho de peso, o lucro **reduz** em ~ **${lucro_extra:,.2f}** no período de **{dias} dias**.")
+
+# --- Impacto inicial da compra (valor padrão 2%)
+variacao_compra = 2.0
+novo_valor_compra = valor_compra_usd * (1 + variacao_compra/100)
+novo_juros = novo_valor_compra * juros_anual * (dias / 365)
+novo_custo_total = novo_valor_compra + custo_total_periodo + frete + comissao + novo_juros
+novo_lucro = receita - novo_custo_total
+
+impacto_compra_abs = lucro - novo_lucro
+impacto_compra_pct = (impacto_compra_abs / lucro * 100) if lucro != 0 else 0
+st.markdown(
+    f"- 🐂 A cada **+{variacao_compra:.1f}%** no valor de compra do animal, "
+    f"o lucro **reduz** em ~ **${impacto_compra_abs:,.2f} ({impacto_compra_pct:.2f}%)**."
+)
+
+# --- Impacto inicial da venda (valor padrão 2%)
+variacao_venda = 2.0
+novo_preco_venda = preco_venda_kg * (1 + variacao_venda/100)
+nova_receita = peso_final * novo_preco_venda
+novo_lucro_venda = nova_receita - custo_total - juros_valor
+
+impacto_venda_abs = novo_lucro_venda - lucro
+impacto_venda_pct = (impacto_venda_abs / lucro * 100) if lucro != 0 else 0
+st.markdown(
+    f"- 💵 A cada **+{variacao_venda:.1f}%** no preço de venda, "
+    f"o lucro **aumenta** em ~ **${impacto_venda_abs:,.2f} ({impacto_venda_pct:.2f}%)**."
+)
+
+# ==============================
+# Sliders abaixo das frases
+# ==============================
+st.markdown("---")
 colA, colB = st.columns(2)
 with colA:
     variacao_compra = st.slider(
@@ -304,43 +343,4 @@ with colB:
         min_value=0.0, max_value=10.0,
         value=2.0, step=0.1
     )
-
-incremento_gmd = 0.01  # 0,01 kg = 10 g
-ganho_extra = incremento_gmd * dias
-lucro_extra = ganho_extra * preco_venda_kg
-
-st.subheader("📈 Análise de Impacto")
-
-# Impacto no GMD (±10 g/dia)
-impact_text = f"""
-- ⚖️ A cada **+10 g/dia** no ganho de peso, o lucro **aumenta** em ~ **${lucro_extra:,.2f}** no período de **{dias} dias**.  
-- ⚖️ A cada **-10 g/dia** no ganho de peso, o lucro **reduz** em ~ **${lucro_extra:,.2f}** no período de **{dias} dias**.  
-"""
-
-# Impacto de +X% no valor de compra
-novo_valor_compra = valor_compra_usd * (1 + variacao_compra/100)
-novo_juros = novo_valor_compra * juros_anual * (dias / 365)
-novo_custo_total = novo_valor_compra + custo_total_periodo + frete + comissao + novo_juros
-novo_lucro = receita - novo_custo_total
-
-impacto_compra_abs = lucro - novo_lucro
-impacto_compra_pct = (impacto_compra_abs / lucro * 100) if lucro != 0 else 0
-
-impact_text += f"- 🐂 A cada **+{variacao_compra:.1f}%** no valor de compra do animal, o lucro **reduz** em ~ **${impacto_compra_abs:,.2f} ({impacto_compra_pct:.2f}%)**.  \n"
-
-# Impacto de +Y% no preço de venda
-novo_preco_venda = preco_venda_kg * (1 + variacao_venda/100)
-nova_receita = peso_final * novo_preco_venda
-novo_lucro_venda = nova_receita - custo_total - juros_valor
-
-impacto_venda_abs = novo_lucro_venda - lucro
-impacto_venda_pct = (impacto_venda_abs / lucro * 100) if lucro != 0 else 0
-
-impact_text += f"- 💵 A cada **+{variacao_venda:.1f}%** no preço de venda, o lucro **aumenta** em ~ **${impacto_venda_abs:,.2f} ({impacto_venda_pct:.2f}%)**.  \n"
-
-# Mostrar lista final
-st.markdown(impact_text)
-
-
-
 
